@@ -225,7 +225,3 @@ docker compose down -v
 docker compose -f docker-compose.dev.yml up -d
 ```
 </details>
-
----
-
-<p align="center">Made with ❤️ by VocabAI Team</p>
