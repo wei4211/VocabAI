@@ -30,21 +30,24 @@ def verify_line_signature(body: bytes, signature: str) -> bool:
     return hmac.compare_digest(expected, signature)
 
 
-def reply_to_line(reply_token: str, message: str):
+async def reply_to_line(reply_token: str, message: str):
     if not settings.LINE_CHANNEL_ACCESS_TOKEN:
+        print("LINE_CHANNEL_ACCESS_TOKEN not set")
         return
-    httpx.post(
-        LINE_REPLY_URL,
-        headers={
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {settings.LINE_CHANNEL_ACCESS_TOKEN}",
-        },
-        json={
-            "replyToken": reply_token,
-            "messages": [{"type": "text", "text": message}],
-        },
-        timeout=10,
-    )
+    async with httpx.AsyncClient() as client:
+        res = await client.post(
+            LINE_REPLY_URL,
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {settings.LINE_CHANNEL_ACCESS_TOKEN}",
+            },
+            json={
+                "replyToken": reply_token,
+                "messages": [{"type": "text", "text": message}],
+            },
+            timeout=10,
+        )
+        print(f"LINE reply status: {res.status_code}, body: {res.text}")
 
 
 def generate_bind_code() -> str:
@@ -125,32 +128,32 @@ async def line_webhook(
                 ).first()
 
                 if not user:
-                    reply_to_line(reply_token, "❌ 綁定碼無效或已過期，請在 VocabAI 網站重新產生。")
+                    await reply_to_line(reply_token, "❌ 綁定碼無效或已過期，請在 VocabAI 網站重新產生。")
                     continue
 
                 # 確認這個 LINE 帳號沒有綁定其他用戶
                 existing = db.query(User).filter(User.line_user_id == line_user_id).first()
                 if existing and existing.id != user.id:
-                    reply_to_line(reply_token, "❌ 此 LINE 帳號已綁定其他 VocabAI 帳號。")
+                    await reply_to_line(reply_token, "❌ 此 LINE 帳號已綁定其他 VocabAI 帳號。")
                     continue
 
                 user.line_user_id = line_user_id
                 user.line_bind_code = None
                 user.line_bind_expires = None
                 db.commit()
-                reply_to_line(reply_token, f"✅ 綁定成功！歡迎 {user.username}！\n\n現在你可以直接傳英文單字給我，我會幫你加入單字庫。\n\n輸入「幫助」查看更多指令。")
+                await reply_to_line(reply_token, f"✅ 綁定成功！歡迎 {user.username}！\n\n現在你可以直接傳英文單字給我，我會幫你加入單字庫。\n\n輸入「幫助」查看更多指令。")
                 continue
 
             # ── 查詢已綁定用戶 ──
             user = db.query(User).filter(User.line_user_id == line_user_id).first()
 
             if not user:
-                reply_to_line(reply_token, "👋 你好！請先在 VocabAI 網站（個人資料頁）產生綁定碼，然後傳送：\n\nBIND 你的綁定碼")
+                await reply_to_line(reply_token, "👋 你好！請先在 VocabAI 網站（個人資料頁）產生綁定碼，然後傳送：\n\nBIND 你的綁定碼")
                 continue
 
             # ── 指令處理 ──
             if text in ["幫助", "help", "Help", "HELP"]:
-                reply_to_line(reply_token,
+                await reply_to_line(reply_token,
                     "📚 VocabAI 指令列表：\n\n"
                     "• 直接傳英文單字 → 加入單字庫\n"
                     "• 幫助 → 顯示此訊息\n"
@@ -160,13 +163,13 @@ async def line_webhook(
 
             if text in ["單字數", "stats"]:
                 count = db.query(Word).filter(Word.user_id == user.id).count()
-                reply_to_line(reply_token, f"📖 你目前共有 {count} 個單字！")
+                await reply_to_line(reply_token, f"📖 你目前共有 {count} 個單字！")
                 continue
 
             # ── 新增單字 ──
             word_text = text.lower().split()[0]
             if not word_text.isalpha():
-                reply_to_line(reply_token, "請傳送英文單字，例如：sustain")
+                await reply_to_line(reply_token, "請傳送英文單字，例如：sustain")
                 continue
 
             existing_word = db.query(Word).filter(
@@ -175,7 +178,7 @@ async def line_webhook(
             ).first()
 
             if existing_word:
-                reply_to_line(reply_token,
+                await reply_to_line(reply_token,
                     f"⚠️「{word_text}」已在你的單字庫中！\n\n"
                     f"📖 {existing_word.meaning or '（尚無解釋）'}"
                 )
@@ -205,7 +208,7 @@ async def line_webhook(
                 msg += f"詞性：{ai_data['part_of_speech']}\n"
             if ai_data.get("example_sentence"):
                 msg += f"\n💬 {ai_data['example_sentence']}"
-            reply_to_line(reply_token, msg)
+            await reply_to_line(reply_token, msg)
 
     finally:
         db.close()
