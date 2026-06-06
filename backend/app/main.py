@@ -28,7 +28,7 @@ app.include_router(review.router, prefix="/api")
 app.include_router(dashboard.router, prefix="/api")
 app.include_router(ocr.router, prefix="/api")
 app.include_router(extensions.router, prefix="/api")
-app.include_router(line_bot.router)
+app.include_router(line_bot.router, prefix="/api")
 
 
 @app.get("/")
