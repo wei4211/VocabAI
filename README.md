@@ -4,11 +4,22 @@
 
 ---
 
+## 截圖
+
+| 登入頁面 | Dashboard |
+|---------|-----------|
+| ![登入](docs/註冊登入畫面.png) | ![Dashboard](docs/網站主頁.png) |
+
+| 單字庫 | LINE Bot |
+|--------|---------|
+| ![單字庫](docs/單字庫.png) | ![LINE](docs/line展示圖.jpg) |
+
+---
+
 ## 線上網址
 
-- **Frontend**：https://vocabai-frontend.onrender.com
-- **Backend API**：https://vocabai-backend.onrender.com
-- **API 文件**：https://vocabai-backend.onrender.com/docs
+- **網站**：https://vocabai-frontend.onrender.com
+- **API 文件**（開發用）：https://vocabai-backend.onrender.com/docs
 
 > ⚠️ 使用 Render 免費方案，閒置一段時間後服務會休眠，第一次開啟需等約 30 秒。
 
