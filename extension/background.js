@@ -23,7 +23,7 @@ chrome.contextMenus.onClicked.addListener(async (info) => {
     return;
   }
 
-  const url = (apiUrl || "http://localhost:8080") + "/api/extensions/save-word";
+  const url = (apiUrl || "https://vocabai-backend.onrender.com") + "/api/extensions/save-word";
 
   try {
     const res = await fetch(url, {

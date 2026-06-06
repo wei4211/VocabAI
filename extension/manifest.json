@@ -9,7 +9,8 @@
     "activeTab"
   ],
   "host_permissions": [
-    "http://localhost:8080/*"
+    "http://localhost:8080/*",
+    "https://vocabai-backend.onrender.com/*"
   ],
   "background": {
     "service_worker": "background.js"

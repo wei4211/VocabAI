@@ -1,4 +1,4 @@
-const API_URL_DEFAULT = "http://localhost:8080";
+const API_URL_DEFAULT = "https://vocabai-backend.onrender.com";
 
 let apiUrl = API_URL_DEFAULT;
 let token = null;
