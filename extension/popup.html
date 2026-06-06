@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VocabAI</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      width: 320px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f8fafc;
+      color: #1e293b;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #0ea5e9, #3b82f6);
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .header h1 {
+      color: white;
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .header .logo {
+      width: 32px;
+      height: 32px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+
+    .content { padding: 16px; }
+
+    /* 未登入 */
+    #login-section { display: none; }
+    #main-section { display: none; }
+
+    .label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #64748b;
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 10px;
+      font-size: 14px;
+      outline: none;
+      background: white;
+      transition: border-color 0.2s;
+      margin-bottom: 10px;
+    }
+
+    input:focus { border-color: #0ea5e9; }
+
+    .btn {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: #0ea5e9;
+      color: white;
+    }
+
+    .btn-primary:hover { background: #0284c7; }
+    .btn-primary:disabled { background: #94a3b8; cursor: not-allowed; }
+
+    .btn-danger {
+      background: #fee2e2;
+      color: #ef4444;
+      margin-top: 8px;
+    }
+
+    .btn-danger:hover { background: #fecaca; }
+
+    .status {
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      margin-top: 10px;
+      display: none;
+    }
+
+    .status.success { background: #f0fdf4; color: #16a34a; display: block; }
+    .status.error   { background: #fef2f2; color: #dc2626; display: block; }
+    .status.info    { background: #eff6ff; color: #2563eb; display: block; }
+
+    .word-input-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .word-input-row input { margin-bottom: 0; }
+
+    .word-input-row .btn {
+      width: auto;
+      padding: 10px 16px;
+      flex-shrink: 0;
+    }
+
+    .divider {
+      border: none;
+      border-top: 1px solid #e2e8f0;
+      margin: 14px 0;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #38bdf8, #818cf8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 700;
+      font-size: 13px;
+    }
+
+    .user-name { font-size: 14px; font-weight: 600; }
+    .user-email { font-size: 11px; color: #94a3b8; }
+
+    .api-url-row {
+      margin-top: 12px;
+    }
+
+    .hint {
+      font-size: 11px;
+      color: #94a3b8;
+      margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">⚡</div>
+    <h1>VocabAI</h1>
+  </div>
+
+  <div class="content">
+    <!-- 未登入 -->
+    <div id="login-section">
+      <label class="label">API 位址</label>
+      <input type="text" id="api-url" placeholder="http://localhost:8080" />
+
+      <label class="label">Email</label>
+      <input type="email" id="email" placeholder="your@email.com" />
+
+      <label class="label">密碼</label>
+      <input type="password" id="password" placeholder="••••••••" />
+
+      <button class="btn btn-primary" id="login-btn">登入</button>
+      <div class="status" id="login-status"></div>
+    </div>
+
+    <!-- 已登入 -->
+    <div id="main-section">
+      <div class="user-info">
+        <div class="avatar" id="avatar">W</div>
+        <div>
+          <div class="user-name" id="username">用戶</div>
+          <div class="user-email" id="user-email">email</div>
+        </div>
+      </div>
+
+      <label class="label">手動新增單字</label>
+      <div class="word-input-row">
+        <input type="text" id="word-input" placeholder="輸入英文單字..." />
+        <button class="btn btn-primary" id="add-btn">新增</button>
+      </div>
+
+      <div class="status" id="main-status"></div>
+
+      <p class="hint">💡 也可以在網頁上選取文字，右鍵 → 加入 VocabAI</p>
+
+      <hr class="divider" />
+      <button class="btn btn-danger" id="logout-btn">登出</button>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

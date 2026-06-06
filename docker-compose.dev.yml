@@ -1,0 +1,18 @@
+version: "3.9"
+
+# Development override: only runs DB in Docker, run backend & frontend locally
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: vocabai_db_dev
+    environment:
+      POSTGRES_USER: vocabai
+      POSTGRES_PASSWORD: vocabai_pass
+      POSTGRES_DB: vocabai
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data_dev:/var/lib/postgresql/data
+
+volumes:
+  postgres_data_dev:
