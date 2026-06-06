@@ -20,6 +20,9 @@
   </a>
 </p>
 
+🌐 **網站**：https://vocabai-frontend.onrender.com  
+📡 **API 文件**（開發用）：https://vocabai-backend.onrender.com/docs
+
 > ⚠️ 使用 Render 免費方案，閒置一段時間後服務會休眠，第一次開啟需等約 30 秒。
 
 ---
