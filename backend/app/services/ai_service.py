@@ -67,10 +67,17 @@ def generate_quiz_questions(words: list[dict], question_count: int = 10) -> list
     prompt = f"""Create {min(question_count, len(words))} quiz questions for these English vocabulary words:
 {words_text}
 
-Mix these question types evenly:
-1. multiple_choice: 4 options, test meaning recognition
-2. fill_blank: fill in the blank sentence
-3. translation: Chinese to English translation
+Use these question types:
+1. multiple_choice: Show the Chinese meaning, ask which English word matches. 4 options (English words).
+   Example: question_text="「維持；支撐」是哪個英文單字？", correct_answer="sustain", options=["sustain","abandon","enhance","reduce"]
+
+2. fill_blank: Give a complete English sentence with the target word replaced by "______". 4 options to choose from.
+   Example: question_text="She could not ______ the pace of the race.", correct_answer="sustain", options=["sustain","ignore","create","destroy"]
+
+3. multiple_choice (Chinese sentence): Give a Chinese sentence, ask which English word fits. 4 options.
+   Example: question_text="她無法______比賽的速度。選出正確的英文單字：", correct_answer="sustain", options=["sustain","abandon","enhance","reduce"]
+
+Mix all types evenly. ALL questions must have 4 options. Never require free-text input.
 
 Return ONLY a JSON array:
 [
@@ -81,8 +88,7 @@ Return ONLY a JSON array:
     "correct_answer": "correct answer",
     "options": ["option1", "option2", "option3", "option4"]
   }}
-]
-For fill_blank and translation, options is null."""
+]"""
 
     try:
         client = _get_client()

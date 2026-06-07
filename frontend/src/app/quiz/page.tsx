@@ -47,7 +47,6 @@ export default function QuizPage() {
   };
 
   const handleAnswer = (answer: string) => {
-    if (selected !== null) return;
     setSelected(answer);
     const question = quiz!.questions[currentQ];
     setAnswers((prev) => ({ ...prev, [question.id]: answer }));
@@ -260,7 +259,6 @@ export default function QuizPage() {
                 <button
                   key={i}
                   onClick={() => handleAnswer(opt)}
-                  disabled={isAnswered}
                   className={cn(
                     "w-full text-left p-4 rounded-2xl border-2 transition-all duration-200 font-medium",
                     !isAnswered && "hover:border-brand-400 hover:bg-brand-50 dark:hover:bg-brand-900/20 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300",
@@ -279,10 +277,7 @@ export default function QuizPage() {
               ))}
             </div>
           ) : (
-            <FillInput
-              onSubmit={(val) => handleAnswer(val)}
-              disabled={isAnswered}
-            />
+            <div className="text-center text-gray-400 py-4">題目載入中...</div>
           )}
 
           {isAnswered && (
