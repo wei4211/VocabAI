@@ -12,7 +12,20 @@ function speakWord(word: string) {
   if (!window.speechSynthesis) return;
   const utter = new SpeechSynthesisUtterance(word);
   utter.lang = "en-US";
-  utter.rate = 0.9;
+  utter.rate = 0.85;
+  utter.pitch = 1;
+
+  const voices = window.speechSynthesis.getVoices();
+  const preferred = voices.find(v =>
+    v.name.includes("Samantha") ||
+    v.name.includes("Karen") ||
+    v.name.includes("Daniel") ||
+    v.name.includes("Google US English") ||
+    v.name.includes("Microsoft Aria")
+  );
+  if (preferred) utter.voice = preferred;
+
+  window.speechSynthesis.cancel();
   window.speechSynthesis.speak(utter);
 }
 
