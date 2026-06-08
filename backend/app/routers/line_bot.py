@@ -167,9 +167,12 @@ async def line_webhook(
                 continue
 
             # ── 新增單字 ──
-            word_text = text.lower().split()[0]
+            parts = text.split(None, 1)
+            word_text = parts[0].lower()
+            user_meaning = parts[1].strip() if len(parts) > 1 else None
+
             if not word_text.isalpha():
-                await reply_to_line(reply_token, "請傳送英文單字，例如：sustain")
+                await reply_to_line(reply_token, "請傳送英文單字，例如：\nsustain\nsustain 維持；支撐")
                 continue
 
             existing_word = db.query(Word).filter(
@@ -184,12 +187,12 @@ async def line_webhook(
                 )
                 continue
 
-            # 呼叫 AI 產生單字卡
+            # 呼叫 AI 產生單字卡（使用者自填的不覆蓋）
             ai_data = generate_word_card(word_text)
             word = Word(
                 user_id=user.id,
                 word=word_text,
-                meaning=ai_data.get("meaning"),
+                meaning=user_meaning or ai_data.get("meaning"),
                 part_of_speech=ai_data.get("part_of_speech"),
                 example_sentence=ai_data.get("example_sentence"),
                 synonyms=ai_data.get("synonyms"),
@@ -201,9 +204,10 @@ async def line_webhook(
             db.refresh(word)
             create_review_schedule(db, user.id, word.id)
 
+            meaning_shown = user_meaning or ai_data.get("meaning", "")
             msg = f"✅ 已加入「{word_text}」！\n\n"
-            if ai_data.get("meaning"):
-                msg += f"📖 {ai_data['meaning']}\n"
+            if meaning_shown:
+                msg += f"📖 {meaning_shown}\n"
             if ai_data.get("part_of_speech"):
                 msg += f"詞性：{ai_data['part_of_speech']}\n"
             if ai_data.get("example_sentence"):
