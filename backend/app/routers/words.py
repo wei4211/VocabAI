@@ -12,12 +12,12 @@ from app.services.review_service import create_review_schedule
 router = APIRouter(prefix="/words", tags=["words"])
 
 
-def _enrich_word_with_ai(db: Session, word_id: int):
+def _enrich_word_with_ai(db: Session, word_id: int, user_meaning: str | None = None):
     """Background task to enrich word with AI data."""
     word = db.query(Word).filter(Word.id == word_id).first()
     if not word:
         return
-    ai_data = generate_word_card(word.word)
+    ai_data = generate_word_card(word.word, user_meaning=user_meaning)
     if not word.meaning and ai_data.get("meaning"):
         word.meaning = ai_data["meaning"]
     if not word.part_of_speech and ai_data.get("part_of_speech"):
@@ -42,8 +42,6 @@ def create_word(
     if existing:
         raise HTTPException(status_code=400, detail="Word already exists in your vocabulary")
 
-    needs_ai = not word_data.meaning
-
     word = Word(
         user_id=current_user.id,
         word=word_data.word.lower().strip(),
@@ -60,8 +58,8 @@ def create_word(
 
     create_review_schedule(db, current_user.id, word.id)
 
-    if needs_ai:
-        background_tasks.add_task(_enrich_word_with_ai, db, word.id)
+    # Always enrich missing fields with AI, passing user_meaning so AI generates matching content
+    background_tasks.add_task(_enrich_word_with_ai, db, word.id, word_data.meaning or None)
 
     return word
 

@@ -188,7 +188,7 @@ async def line_webhook(
                 continue
 
             # 呼叫 AI 產生單字卡（使用者自填的不覆蓋）
-            ai_data = generate_word_card(word_text)
+            ai_data = generate_word_card(word_text, user_meaning=user_meaning)
             word = Word(
                 user_id=user.id,
                 word=word_text,

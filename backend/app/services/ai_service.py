@@ -12,12 +12,25 @@ def _get_client():
 MODEL = "gemini-2.5-flash"
 
 
-def generate_word_card(word: str) -> dict:
+def generate_word_card(word: str, user_meaning: str | None = None) -> dict:
     """Use Gemini to generate vocabulary card data."""
     if not settings.GEMINI_API_KEY:
         return _fallback_word_card(word)
 
-    prompt = f"""For the English word "{word}", provide a JSON response with:
+    if user_meaning:
+        prompt = f"""The English word "{word}" is being used with the specific Chinese meaning: "{user_meaning}".
+
+Based on this specific meaning, provide a JSON response with:
+- meaning: use exactly "{user_meaning}" (繁體中文)
+- part_of_speech: grammatical category that matches this meaning (noun/verb/adjective/adverb/etc.)
+- example_sentence: one natural English example sentence that reflects this specific meaning
+- synonyms: comma-separated list of 2-3 English synonyms that match this specific meaning
+- antonyms: comma-separated list of 2-3 antonyms (or empty string if none)
+
+Respond ONLY with valid JSON, no markdown.
+Example: {{"meaning":"轉述；傳達","part_of_speech":"verb","example_sentence":"Please forward this message to the team.","synonyms":"relay, pass on, redirect","antonyms":"withhold, keep, retain"}}"""
+    else:
+        prompt = f"""For the English word "{word}", provide a JSON response with:
 - meaning: Chinese translation/explanation (繁體中文)
 - part_of_speech: grammatical category (noun/verb/adjective/adverb/etc.)
 - example_sentence: one natural English example sentence
