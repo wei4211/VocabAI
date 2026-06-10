@@ -16,20 +16,29 @@ export default function BatchAddPage() {
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<Result[]>([]);
 
-  const parseWords = (input: string): string[] => {
+  const parseEntries = (input: string): Array<{ word: string; meaning?: string }> => {
     return input
-      .split(/[\n,，、\s]+/)
-      .map((w) => w.trim().toLowerCase())
-      .filter((w) => w.length > 0 && /^[a-zA-Z\-]+$/.test(w));
+      .split(/[\n,，、]+/)
+      .map((line) => {
+        const trimmed = line.trim();
+        const spaceIdx = trimmed.search(/\s/);
+        if (spaceIdx === -1) {
+          return { word: trimmed.toLowerCase() };
+        }
+        const word = trimmed.slice(0, spaceIdx).toLowerCase();
+        const meaning = trimmed.slice(spaceIdx).trim() || undefined;
+        return { word, meaning };
+      })
+      .filter(({ word }) => word.length > 0 && /^[a-zA-Z\-]+$/.test(word));
   };
 
   const handleSubmit = async () => {
-    const words = parseWords(text);
-    if (words.length === 0) {
+    const entries = parseEntries(text);
+    if (entries.length === 0) {
       toast.error("請輸入英文單字");
       return;
     }
-    if (words.length > 50) {
+    if (entries.length > 50) {
       toast.error("一次最多 50 個單字");
       return;
     }
@@ -38,9 +47,9 @@ export default function BatchAddPage() {
     setResults([]);
     const newResults: Result[] = [];
 
-    for (const word of words) {
+    for (const { word, meaning } of entries) {
       try {
-        await wordsApi.create({ word, source: "manual" });
+        await wordsApi.create({ word, meaning, source: "manual" });
         newResults.push({ word, status: "success" });
       } catch (err: any) {
         const detail = err.response?.data?.detail || "";
@@ -58,7 +67,7 @@ export default function BatchAddPage() {
     toast.success(`完成！成功新增 ${successCount} 個單字`);
   };
 
-  const preview = parseWords(text);
+  const preview = parseEntries(text);
 
   return (
     <AppLayout>
@@ -82,12 +91,13 @@ export default function BatchAddPage() {
             onChange={(e) => setText(e.target.value)}
             className="input-field resize-none"
             rows={8}
-            placeholder={"sustain\nabandon\npersevere\n或者 sustain, abandon, persevere"}
+            placeholder={"sustain\nabandon 放棄\npersevere 堅持\n或者 sustain, abandon, persevere"}
             disabled={loading}
           />
           {preview.length > 0 && (
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
               偵測到 <span className="font-semibold text-brand-500">{preview.length}</span> 個單字
+              （其中 <span className="font-semibold text-brand-500">{preview.filter(e => e.meaning).length}</span> 個有自訂中文意思）
             </p>
           )}
         </div>
